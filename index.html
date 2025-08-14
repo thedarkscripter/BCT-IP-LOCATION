@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BCT IP Locator — Bangladesh Cyber Troops</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-1: #061224;
+    --bg-2: #1b2740;
+    --accent: #0ff6d2;
+    --accent-2: #8a5af8;
+    --card: rgba(255,255,255,0.03);
+    --glass: rgba(255,255,255,0.06);
+    --muted: #bfc7d6;
+    --text: #eaf6f4;
+    --glass-border: rgba(255,255,255,0.06);
+    --success: #6ef5b4;
+    --danger: #ff7a9a;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:'Poppins',system-ui,Arial,Helvetica,sans-serif;
+    background: radial-gradient(1000px 400px at 10% 10%, rgba(138,90,248,0.12), transparent),
+                linear-gradient(180deg,var(--bg-1),var(--bg-2));
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px 16px;
+  }
+
+  /* Unique top bar (white strip with black text centre) */
+  .topbar {
+    width:100%;
+    max-width:1100px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.98), rgba(245,245,245,0.98));
+    border-radius:16px;
+    padding:10px 18px;
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    box-shadow:0 10px 30px rgba(10,10,10,0.25);
+    overflow:visible;
+  }
+  .topbar::before{
+    content:"";
+    position:absolute;
+    left:-40px; right:-40px;
+    top:100%;
+    height:18px;
+    background:linear-gradient(90deg, rgba(138,90,248,0.12), rgba(15,246,210,0.08));
+    filter:blur(20px);
+    opacity:0.9;
+    transform:translateY(-10px) rotate(-1deg);
+    border-radius:12px;
+    z-index:0;
+  }
+  .topbar h1{
+    margin:0;
+    font-family:'Orbitron', sans-serif;
+    color:#0b0b0b;
+    font-weight:800;
+    letter-spacing:1px;
+    font-size:20px;
+    z-index:2;
+  }
+  .topbar .sub {
+    position:absolute;
+    right:14px;
+    font-size:12px;
+    color:#333;
+    z-index:2;
+    opacity:0.8;
+  }
+
+  /* Main container */
+  .layout {
+    max-width:1100px;
+    width:100%;
+    display:grid;
+    grid-template-columns: 1fr 380px;
+    gap:18px;
+    align-items:start;
+  }
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr; padding-bottom:24px}
+  }
+
+  /* Big left column (cards) */
+  .panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));
+    border-radius:14px;
+    padding:18px;
+    border:1px solid var(--glass-border);
+    box-shadow: 0 8px 30px rgba(6,9,20,0.55);
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+  .panel-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .panel-header h2{
+    margin:0;
+    font-family:'Orbitron',sans-serif;
+    font-size:18px;
+    letter-spacing:0.6px;
+    color:var(--accent-2);
+  }
+  .muted { color:var(--muted); font-size:13px; margin-top:6px }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap:12px;
+    margin-top:14px;
+  }
+
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:12px;
+    padding:12px;
+    border:1px solid rgba(255,255,255,0.04);
+    transition: transform .18s ease, box-shadow .18s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .card:hover{ transform:translateY(-6px); box-shadow:0 18px 40px rgba(11,17,30,0.5) }
+
+  .label {
+    font-size:12px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-bottom:6px;
+  }
+  .value {
+    font-size:15px;
+    color:var(--text);
+    word-break:break-word;
+  }
+
+  .value.big { font-size:18px; font-weight:600; color:#fff; letter-spacing:0.2px }
+
+  .mini-row { display:flex; gap:8px; align-items:center; justify-content:space-between; }/* copy button */
+  .copy-btn {
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    color:var(--muted);
+    padding:6px 8px;
+    border-radius:8px;
+    cursor:pointer;
+    transition: all .12s ease;
+    font-size:13px;
+  }
+  .copy-btn:hover{ color:var(--accent); transform:translateY(-2px)}
+  .chip { font-size:12px; padding:5px 8px; border-radius:999px; border:1px solid rgba(255,255,255,0.04); color:var(--muted) }
+
+  /* Right column — Unique Info Panel */
+  .side {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .stat {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px;
+    border-radius:12px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .stat .left { display:flex; gap:12px; align-items:center }
+  .dot {
+    width:46px; height:46px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#04101a; font-weight:700;
+    box-shadow: 0 6px 18px rgba(138,90,248,0.15);
+    font-family:'Orbitron',sans-serif;
+  }
+  .stat .meta { text-align:right }
+  .meta .m1{ font-weight:700; color:#fff; font-size:16px }
+  .meta .m2{ color:var(--muted); font-size:12px }
+
+  /* JSON viewer box */
+  .jsonbox {
+    margin-top:10px;
+    padding:12px;
+    border-radius:10px;
+    background:rgba(0,0,0,0.25);
+    font-family:monospace;
+    font-size:12px;
+    color:#cfeff0;
+    max-height:220px; overflow:auto; white-space:pre-wrap;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  /* Footer */
+  footer {
+    max-width:1100px;
+    width:100%;
+    margin-top:18px;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    padding:12px;
+    border-radius:10px;
+  }
+  footer a { color:var(--accent); text-decoration:none; }
+  footer a.hidden-link { color:transparent; text-decoration:none; pointer-events:auto }
+  footer small { display:block; margin-top:6px; color:var(--muted) }
+
+  /* small helpers */
+  .badge { font-size:11px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,0.02); color:var(--muted) }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar" role="banner">
+  <h1>BCT IP Locator</h1>
+  <div class="sub"> Pro </div>
+</div>
+
+<!-- Layout -->
+<main class="layout" role="main">
+
+  <!-- Left big column -->
+  <section class="panel" aria-labelledby="main-title">
+    <div class="panel-header">
+      <div>
+        <h2 id="main-title">🌐 IP Information</h2>
+        <div class="muted">আপনার নেটওয়ার্ক/নির্দিষ্ট IP থেকে যতটা পাওয়া যায় তা এখানে দেখাবে। (Client-side request)</div>
+      </div>
+      <div class="badge" id="loadedAt">Loading…</div>
+    </div>
+
+    <!-- Primary info grid -->
+    <div class="grid" id="primaryGrid" style="margin-top:18px">
+      <div class="card">
+        <div class="label">IP Address</div>
+        <div class="mini-row">
+          <div class="value big" id="ipAddr">-</div>
+          <button class="copy-btn" data-copy="ipAddr">Copy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Hostname / Reverse DNS</div>
+        <div class="mini-row">
+          <div class="value" id="hostname">-</div>
+          <button class="copy-btn" data-copy="hostname">Copy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Continent</div>
+        <div class="value" id="continent">-</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Country</div>
+        <div class="mini-row">
+          <div>
+            <div class="value" id="country">-</div>
+            <div class="muted" id="countryFull">-</div>
+          </div>
+          <button class="copy-btn" data-copy="country">Copy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Region / State</div>
+        <div class="value" id="region">-</div>
+      </div><div class="stat">
+      <div class="left">
+        <div class="dot">SEC</div>
+        <div>
+          <div class="m1" id="s_sec">-</div>
+          <div class="m2">Proxy / VPN / Tor</div>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="m1" id="s_time">-</div>
+        <div class="m2">Timezone</div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="label" style="margin:0">Quick Actions</div>
+          <div class="muted" style="margin-top:6px">Useful shortcuts</div>
+        </div>
+        <div>
+          <button class="copy-btn" id="copyAll">Copy IP</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+        <button class="chip" id="openMail">Contact</button>
+        <button class="chip" id="whoisBtn">WHOIS</button>
+        <button class="chip" id="rdnsBtn">Reverse DNS</button>
+        <button class="chip" id="asBtn">ASN Lookup</button>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:10px; text-align:center">
+      <div class="muted">©️ All Right Reserved - 2025 :</div>
+      <div style="margin-top:6px"><a href="mailto:bangladeshcybertroopsbct@gmail.com" style="color:var(--accent); text-decoration:none">Bangladesh Cyber Troops</a></div>
+      <small style="display:block; margin-top:10px">Developer: <a class="hidden-link" href="https://www.facebook.com/100000109914730" target="_blank" rel="noopener">Adnan Hasan Sakib</a></small>
+    </div>
+
+  </aside>
+</main>
+
+<!-- Scripts -->
+<script>
+(function(){
+  const els = (id)=>document.getElementById(id);
+  function set(id, val){ const e = els(id); if(e) e.textContent = val ?? '-'; }
+
+  // Safe getter
+  function getSafe(obj, path, fallback='-'){
+    try{
+      const v = path.split('.').reduce((s,p)=>s && s[p] !== undefined ? s[p] : undefined, obj);
+      return v === undefined || v === null ? fallback : v;
+    }catch(e){ return fallback; }
+  }
+
+  // Browser sniff (simple)
+  function detectBrowser(){
+    const ua = navigator.userAgent;
+    let name = 'Unknown';
+    if (ua.indexOf("Firefox") !== -1) name = 'Firefox';
+    else if (ua.indexOf("Opera") !== -1 || ua.indexOf("OPR") !== -1) name = 'Opera';
+    else if (ua.indexOf("Trident") !== -1) name = 'Internet Explorer';
+    else if (ua.indexOf("Edge") !== -1) name = 'Edge';
+    else if (ua.indexOf("Chrome") !== -1) name = 'Chrome';
+    else if (ua.indexOf("Safari") !== -1) name = 'Safari';
+    const version = (ua.match(/(firefox|fxios|chrome|crios|safari|edg|opr|opera|trident)\/?\s*(\d+)/i) || [,'',navigator.appVersion])[2];
+    return name + (version ? ' ' + version : '');
+  }
+
+  // Platform
+  function detectPlatform(){
+    const p = navigator.platform || 'Unknown';
+    return p;
+  }
+
+  // Format security summary
+  function securitySummary(sec){
+    if(!sec) return '-';
+    const parts = [];
+    if (sec.proxy) parts.push('Proxy');
+    if (sec.vpn) parts.push('VPN');
+    if (sec.tor) parts.push('Tor');
+    if (sec.hosting) parts.push('Hosting');
+    if (parts.length===0) return 'No (detected)';
+    return parts.join(' • ');
+  }
+
+  // Copy helper
+  function copyText(t){
+    if(!t) return;
+    navigator.clipboard?.writeText(t).then(()=> {
+      // small visual feedback could be added
+    }).catch(()=>{ // fallback
+      const ta = document.createElement('textarea');
+      ta.value = t; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    });
+  }
+
+  // wire copy buttons
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-copy]');
+    if(btn){
+      const id = btn.getAttribute('data-copy');
+      const t = els(id)?.textContent || '';
+      copyText(t.trim());
+      btn.textContent = 'Copied';
+      setTimeout(()=> btn.textContent = 'Copy', 1200);
+    }
+  });// quick action buttons
+  els('openMail').addEventListener('click', ()=> location.href = 'mailto:bangladeshcybertroopsbct@gmail.com');
+  els('whoisBtn').addEventListener('click', ()=>{
+    const ip = els('ipAddr').textContent.trim();
+    if(ip && ip !== '-') window.open('https://whois.arin.net/rest/ip/' + ip, '_blank');
+  });
+  els('rdnsBtn').addEventListener('click', ()=>{
+    const host = els('hostname').textContent.trim();
+    if(host && host !== '-') window.open('https://dns.google/resolve?name=' + host, '_blank');
+    else {
+      const ip = els('ipAddr').textContent.trim();
+      if(ip && ip !== '-') window.open('https://dns.google/resolve?name=' + ip, '_blank');
+    }
+  });
+  els('asBtn').addEventListener('click', ()=>{
+    const asn = els('asn').textContent.trim();
+    if(asn && asn !== '-') window.open('https://bgp.he.net/' + asn.replace(/\s/g,''), '_blank');
+  });
+  els('copyAll').addEventListener('click', ()=>{
+    const ip = els('ipAddr').textContent.trim();
+    if(ip && ip!=='-') copyText(ip);
+    els('copyAll').textContent = 'Copied';
+    setTimeout(()=> els('copyAll').textContent = 'Copy IP', 1200);
+  });
+
+  // Main load
+  (async function load(){
+    const q = new URLSearchParams(window.location.search).get('ip');
+    const endpoint = q ? https://ipwho.is/${encodeURIComponent(q)}?language=en : https://ipwho.is/?language=en;
+    const loadedAt = new Date().toLocaleString();
+    try{
+      const resp = await fetch(endpoint, { headers: { 'Accept':'application/json' }});
+      const j = await resp.json();
+
+      // Fill primary fields (safely)
+      const ip = getSafe(j,'ip','-');
+      set('ipAddr', ip);
+      set('hostname', getSafe(j,'hostname','-'));
+      set('continent', getSafe(j,'continent','-'));
+      set('country', getSafe(j,'country','-'));
+      set('countryFull', getSafe(j,'country_code','-') + ' • ' + getSafe(j,'country','-'));
+      set('region', getSafe(j,'region','-'));
+      set('city', getSafe(j,'city','-'));
+      set('postal', getSafe(j,'postal','-'));
+      const lat = getSafe(j,'latitude', '-');
+      const lon = getSafe(j,'longitude', '-');
+      set('latlon', (lat !== '-' && lon !== '-') ? (lat + ', ' + lon) : '-');
+      set('timezone', getSafe(j,'timezone.id', getSafe(j,'timezone','-')));
+      set('utc', getSafe(j,'timezone.offset', '-'));
+      const cur = getSafe(j,'currency.code','-') + (getSafe(j,'currency.symbol','-') ? ' (' + getSafe(j,'currency.symbol','-') + ')' : '');
+      set('currency', cur);
+      set('calling', getSafe(j,'calling_code','-'));
+      set('isp', getSafe(j,'connection.isp', getSafe(j,'org','-')));
+      const asn = getSafe(j,'connection.asn','-') + (getSafe(j,'connection.org','') ? ' • ' + getSafe(j,'connection.org') : '');
+      set('asn', asn);
+      set('connType', getSafe(j,'connection.type','-'));
+      const security = getSafe(j,'security', null);
+      set('securityInfo', security ? securitySummary(j.security) : '-');
+      // Full address
+      let fullAddr = [ getSafe(j,'city',''), getSafe(j,'region',''), getSafe(j,'postal',''), getSafe(j,'country','') ]
+                      .filter(x=>x && x!=='-').join(', ');
+      if(!fullAddr) fullAddr = '-';
+      set('fullAddress', fullAddr);
+
+      // Side summary
+      set('s_ip', ip);
+      set('s_loc', fullAddr !== '-' ? fullAddr : getSafe(j,'country','-'));
+      set('s_isp', getSafe(j,'connection.isp','-'));
+      set('s_asn', getSafe(j,'connection.asn','-'));
+      set('s_sec', security ? securitySummary(j.security) : 'No');
+      set('s_time', getSafe(j,'timezone.id','-'));
+
+      // Client info
+      set('browser', detectBrowser());
+      set('platform', detectPlatform());
+      set('lang', navigator.language  navigator.userLanguage  '-');
+      set('viewport', ${window.innerWidth}×${window.innerHeight});
+
+      // JSON box (pretty)
+      const pretty = JSON.stringify(j, null, 2);
+      els('jsonBox').textContent = pretty;
+
+      // Show loadedAt
+      els('loadedAt').textContent = 'Loaded: ' + loadedAt;// set some quick copy btns target text (if needed)
+    } catch(err){
+      els('jsonBox').textContent = 'Failed to load data — ' + (err && err.message ? err.message : '');
+      els('loadedAt').textContent = 'Failed';
+      console.error(err);
+      alert('ডাটা লোডিং এ সমস্যা হয়েছে — অনুগ্রহ করে ইন্টারনেট সংযোগ পরীক্ষা করুন অথবা পরে চেষ্টা করুন।');
+    }
+  })();
+
+})();
+</script>
+
+</body>
+</html>
